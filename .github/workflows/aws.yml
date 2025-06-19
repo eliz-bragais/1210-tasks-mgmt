@@ -1,0 +1,25 @@
+deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      - name: Install dependencies
+        run: composer install --no-dev
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Print private key
+        run: |
+          echo "${{ secrets.AWS_PRIVATE_KEY }}" >> /home/runner/work/laravel-github-actions-example/laravel-github-actions-example/id_rsa
+          chmod 600 /home/runner/work/laravel-github-actions-example/laravel-github-actions-example/id_rsa
+      - name: Deploy to AWS EC2
+        run: ssh -o "StrictHostKeyChecking no" -i /home/runner/work/laravel-github-actions-example/laravel-github-actions-example/id_rsa ubuntu@${{ secrets.AWS_INSTANCE_IP }} "cd /var/www/html/laravel-github-actions-example/ && git pull && composer install --no-dev && php artisan migrate --force && php artisan optimize"
