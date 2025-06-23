@@ -16,9 +16,17 @@ class TaskMgmtController extends Controller
         $tasks_status = $request->status ? $request->status : $status;
         $tasks_title = $request->title ? $request->title : $title;
 
-        $tasks = Task::with(['tasks' => function ($query) use ($user_id) {
+        $tasks = Task::with(['tasks' => function ($query) use ($user_id, $tasks_status, $tasks_title) {
                                 $query->whereNull('deleted_at');
                                 $query->where('user_id', $user_id);
+
+                                if($tasks_status != 'all') {
+                                    $query->where('status', $tasks_status);
+                                }
+
+                                if($tasks_title != null) {
+                                    $query->where('title', 'like', '%'.$tasks_title.'%');
+                                }
                             }])
                     ->whereNull('deleted_at')
                     ->where(function ($query) use ($tasks_status, $tasks_title){
@@ -34,7 +42,7 @@ class TaskMgmtController extends Controller
                     ->where('subtask_id', 0)
                     ->orderBy('id', 'asc')
                     ->get();
-        // dd($tasks->toArray());
+
         return view('tasks', compact('tasks'));
     }
 
@@ -93,5 +101,100 @@ class TaskMgmtController extends Controller
         ])->id;
 
         return redirect()->back()->with(array('message' => 'New Sub Task successfully created!', 'error_type' => 'success'));
+    }
+
+    public function updateStatusTask(Request $request)
+    {
+        $task = Task::where('id', $request->task_id)->where('user_id', auth()->user()->id)->whereNull('deleted_at')->first();
+        
+        if($task)
+        {
+            Task::where('id', $request->task_id)
+                ->update([
+                    'status' => $request->task_status_update,
+                    'updated_at' => now()
+                ]);
+
+            if($request->task_status_update == 'done')
+            {
+                if($task->subtask_id > 0)
+                {
+                    $getAllSubTasks = Task::where('subtask_id', $task->subtask_id)->where('user_id', auth()->user()->id)->whereNull('deleted_at')->get();
+
+                    $subtask_status_lists = [];
+                    foreach($getAllSubTasks as $getSubTask) {
+                        array_push($subtask_status_lists, $getSubTask->status);
+                    }
+
+                    if(array_unique($subtask_status_lists) === ['done'])
+                    {
+                        Task::where('id', $task->subtask_id)
+                            ->update([
+                                'status' => $request->task_status_update,
+                                'updated_at' => now()
+                            ]);
+                    }
+                }                
+            }
+
+            return redirect()->back()->with(array('message' => 'Status successfully updated!', 'error_type' => 'success'));
+        }
+        else
+        {
+            return redirect()->back()->with(array('message' => 'Status failed to update!', 'error_type' => 'error'));
+        }
+    }
+
+    public function updateSaveTypeTask(Request $request)
+    {
+        $task = Task::where('id', $request->task_id)->where('user_id', auth()->user()->id)->whereNull('deleted_at')->first();
+        
+        if($task)
+        {
+            Task::where('id', $request->task_id)
+                ->update([
+                    'save_as' => $request->task_save_type_update,
+                    'updated_at' => now()
+                ]);
+            
+            return redirect()->back()->with(array('message' => 'Save Type successfully updated!', 'error_type' => 'success'));
+        }
+        else
+        {
+            return redirect()->back()->with(array('message' => 'Save Type failed to update!', 'error_type' => 'error'));
+        }
+    }
+
+    public function deleteTask(Request $request)
+    {
+        $task = Task::where('id', $request->task_info)->where('user_id', auth()->user()->id)->whereNull('trash_at')->whereNull('deleted_at')->first();
+        
+        if($task)
+        {
+            // Task::where('id', $task->id)->delete();
+            Task::where('id', $task->id)->update(['trash_at' => now()]);
+            
+            return redirect()->back()->with(array('message' => 'Task successfully deleted!', 'error_type' => 'success'));
+        }
+        else
+        {
+            return redirect()->back()->with(array('message' => 'Task failed to delete!', 'error_type' => 'error'));
+        }
+    }
+
+    public function retrieveTask(Request $request)
+    {
+        $task = Task::where('id', $request->task_info)->where('user_id', auth()->user()->id)->whereNotNull('trash_at')->whereNull('deleted_at')->first();
+        
+        if($task)
+        {
+            Task::where('id', $task->id)->update(['trash_at' => null]);
+            
+            return redirect()->back()->with(array('message' => 'Task successfully retrieved!', 'error_type' => 'success'));
+        }
+        else
+        {
+            return redirect()->back()->with(array('message' => 'Task failed to retrieve!', 'error_type' => 'error'));
+        }
     }
 }

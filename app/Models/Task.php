@@ -18,6 +18,7 @@ class Task extends Model
         'save_as',
         'subtask_id',
         'user_id',
+        'trash_at',
         'deleted_at',
         'created_at',
         'updated_at',

@@ -59,4 +59,19 @@ class LoginController extends Controller
 
         return response($response, $code);
     }
+
+    public function logout(Request $request)
+    {
+        $fetchedUser = User::where('id', auth()->user()->id)->first();
+        
+        Auth::guard('web')->logout();
+ 
+        $request->session()->invalidate();
+    
+        $request->session()->regenerateToken();
+
+        return response()->json([
+            'message' => 'You have successfully logged out.'
+        ]);
+    }
 }

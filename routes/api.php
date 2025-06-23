@@ -21,3 +21,9 @@ Route::post('/sign-up', [LoginController::class, 'signUp'])->name('sign-up-post'
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Authenticated API end point
+Route::middleware('auth:sanctum')->group(function () {
+    // Authentication related routes
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout-post');
+});

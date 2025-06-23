@@ -1,10 +1,3 @@
-<div>
-    If you do not have a consistent goal in life, you can not live it in a consistent way. - Marcus Aurelius
-</div>
-
-
-
-
 <div class="vh-100 mx-0" >
 
     <div class="row mx-0 mb-auto">
