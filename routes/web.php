@@ -24,7 +24,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/task-mgmt', [TaskMgmtController::class, 'index'])->name('task-mgmt');
     Route::post('/task-mgmt-create', [TaskMgmtController::class, 'store'])->name('task.mgmt.create');
-    Route::post('/task-mgmt-create-subtask', [TaskMgmtController::class, 'storeSubTask'])->name('task.mgmt.create.subtask');
+    // Route::post('/task-mgmt-create-subtask', [TaskMgmtController::class, 'storeSubTask'])->name('task.mgmt.create.subtask');
     Route::post('/task-mgmt-status-update', [TaskMgmtController::class, 'updateStatusTask'])->name('task.mgmt.status.update');
     Route::post('/task-mgmt-saveType-update', [TaskMgmtController::class, 'updateSaveTypeTask'])->name('task.mgmt.saveType.update');
     Route::get('/task-mgmt/delete-task', [TaskMgmtController::class, 'deleteTask'])->name('delete.task');

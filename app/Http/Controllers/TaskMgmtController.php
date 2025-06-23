@@ -77,7 +77,7 @@ class TaskMgmtController extends Controller
     public function storeSubTask(StoreSubTaskRequest $request)
     {
         $validated = $request->validated();
-        $btn_form = $request->sub_task_btnForm;
+        $save_type = $request->save_type;
 
         if ($request->hasfile('file')) {
             $file = $request->file('file');
@@ -94,13 +94,24 @@ class TaskMgmtController extends Controller
             'content' => $validated['sub_task_content'],
             'status' => $validated['sub_task_status'],
             'image' => $img_name,
-            'save_as' => $btn_form,
+            'save_as' => $save_type,
             'subtask_id' => $request->task_id,
             'user_id' => auth()->user()->id,
             'created_at' => now(),
         ])->id;
 
-        return redirect()->back()->with(array('message' => 'New Sub Task successfully created!', 'error_type' => 'success'));
+        if($task_id)
+        {
+            return response()->json([
+                'message' => 'New Sub Task successfully created.',
+            ]);
+        }
+        else
+        {
+            return response()->json([
+                'message' => 'Failed to create the package.',
+            ], 400);
+        }
     }
 
     public function updateStatusTask(Request $request)

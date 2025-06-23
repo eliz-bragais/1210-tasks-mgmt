@@ -339,41 +339,38 @@
                     <span class="modal-close modal-close-btn">&times;</span>
                 </div>
                 <div class="modal-body">
-                    {{-- <span id="error_msg_sec"></span> --}}
-                    <form action="{{ route('task.mgmt.create.subtask') }}" id="myForm" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="row mb-2">
-                            <div class="col-12 mb-2">
-                                <label class="form-label">Task Title</label>
-                                <input class="form-control" type="text" name="task_title" id="task_title" maxlength="100" readonly required>
-                                <input class="form-control" type="hidden" name="task_id" id="task_id" maxlength="100" readonly required>
-                            </div>
-                            <div class="col-12 mb-2">
-                                <label class="form-label">Sub Task Title</label>
-                                <input class="form-control" type="text" name="sub_task_title" maxlength="100" required autofocus>
-                            </div>
-                            <div class="col-12 mb-2">
-                                <label class="form-label">Content</label>
-                                <input class="form-control" type="text" name="sub_task_content" required>
-                            </div>
-                            <div class="col-12 mb-2">
-                                <label class="form-label">Status</label>
-                                <select class="form-select select-status" name="sub_task_status" required>
-                                    <option value="to-do">To-do</option>
-                                    <option value="in-progress">In-Progress</option>
-                                    <option value="done">Done</option>
-                                </select>
-                            </div>
-                            
+                    <span id="createSubTask_error"></span>
+                    <div class="row mb-2">
+                        <div class="col-12 mb-2">
+                            <label class="form-label">Task Title</label>
+                            <input class="form-control" type="text" name="task_title" id="task_title" maxlength="100" readonly required>
+                            <input class="form-control" type="hidden" name="task_id" id="task_id" maxlength="100" readonly required>
                         </div>
+                        <div class="col-12 mb-2">
+                            <label class="form-label">Sub Task Title</label>
+                            <input class="form-control" type="text" name="sub_task_title" id="sub_task_title" maxlength="100" required autofocus>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <label class="form-label">Content</label>
+                            <input class="form-control" type="text" name="sub_task_content" id="sub_task_content" required>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <label class="form-label">Status</label>
+                            <select class="form-select select-status" name="sub_task_status" id="sub_task_status" required>
+                                <option value="to-do">To-do</option>
+                                <option value="in-progress">In-Progress</option>
+                                <option value="done">Done</option>
+                            </select>
+                        </div>
+                        
+                    </div>
 
-                        <div class="row mx-0 mb-2">
-                            <div class="d-flex mx-0 my-0 px-0">
-                                <button name='sub_task_btnForm' value="publish" class="btn btn-success ms-2 px-4 ms-auto" type="submit">Publish</button>
-                                <button name='sub_task_btnForm' value="draft" class="btn btn-primary ms-2 px-4" type="submit">Save as Draft</button>
-                            </div>
+                    <div class="row mx-0 mb-2">
+                        <div class="d-flex mx-0 my-0 px-0">
+                            <button data-action="publish" class="createSubTask_btn btn btn-success ms-2 px-4 ms-auto" type="button">Publish</button>
+                            <button data-action="draft" class="createSubTask_btn btn btn-primary ms-2 px-4" type="button">Save as Draft</button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -507,7 +504,7 @@
             "aaSorting": [],
             // "order" : [[0, "desc"]],
             // "scrollY" : "380px",
-            pageLength: 50,
+            // pageLength: 50,
             "scrollCollapse" : true,
             "paging" : true,
             "bProcessing" : true,
@@ -528,6 +525,26 @@
             $('#task_id').val(task_info.id);
             
             $('#createSubTaskModal').modal('show');
+        });
+
+        $('.createSubTask_btn').click(function (event) {
+            event.preventDefault();
+
+            axios.post("{{ route('task.mgmt.create.subtask') }}", {
+                sub_task_title: $('#sub_task_title').val(),
+                sub_task_content: $('#sub_task_content').val(),
+                sub_task_status: $('#sub_task_status').val(),
+                task_id: $('#task_id').val(),
+                save_type: $(this).attr('data-action'),
+            }).then(function (response) {
+                $('#createSubTaskModal').modal('hide');
+                swal("", response.data.message, "success");
+            }).catch(function (error) {
+                $('#createSubTask_error').empty();
+
+                $('#createSubTask_error').append('<li class="text-danger">'+error.response.data.message+'</li>');
+                $('#createSubTask_error').append('<br>');
+            });
         });
 
         $('.edit_status').click(function (event) {

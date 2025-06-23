@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\TaskMgmtController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,4 +27,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     // Authentication related routes
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout-post');
+    Route::post('/task-mgmt-create-subtask', [TaskMgmtController::class, 'storeSubTask'])->name('task.mgmt.create.subtask');
 });
